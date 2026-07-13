@@ -124,7 +124,11 @@ Choose your storage levels via `storageLevels` on `registerSettingsCommand` (def
 
 **How edits save:** with a single file level (`global` or `project`), each edit writes straight to that file, so every pi instance reads the same on-disk truth. With multiple levels (or `session`), edits are held as a draft until you press a save key — `Ctrl+S` saves project, `Ctrl+D` saves global (each only when its level is enabled).
 
-> Developed with [Z.ai](https://z.ai/subscribe?ic=N5IV4LLOOV) — get 10% off your subscription via this referral link.
+## Full suite
+
+Check out the full suite of related extensions, [avtc-pi](https://github.com/avtc/avtc-pi) — deterministic feature development, subagent delegation, working-memory, behavioral learning, parallel-work guardrails, durable decisions, notifications, and more.
+
+Developed with [Z.ai](https://z.ai/subscribe?ic=N5IV4LLOOV) — get 10% off your subscription via this referral link.
 
 ## License
 
