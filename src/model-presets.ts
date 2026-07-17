@@ -83,12 +83,17 @@ function isEnabled(model: ModelLike, patterns: readonly string[]): boolean {
  * enabled-models patterns, each `[modelLabel(model), "provider/id"]`, with `["Default", null]`
  * prepended. When the registry was not captured, or enabled-models patterns are configured but
  * match nothing, the list degrades to `["Default", null]` (the modal still opens).
+ *
+ * Async because `modelRegistry.refresh()` is async on pi 0.80.8+ (it reloads models.json
+ * asynchronously). Awaiting it guarantees the subsequent synchronous `getAvailable()` reads
+ * the freshly loaded list rather than a stale one. On older pi (where refresh returned void)
+ * `await`-ing a non-promise is a no-op, so this is forward- and backward-compatible.
  */
-export function resolveModelPresets(): PresetPair[] {
+export async function resolveModelPresets(): Promise<PresetPair[]> {
   const { modelRegistry } = getCapturedCtx();
   if (!modelRegistry) return [DEFAULT_PAIR];
 
-  modelRegistry.refresh();
+  await modelRegistry.refresh();
   const all = modelRegistry.getAvailable();
   const patterns = readEnabledModelPatterns();
 
