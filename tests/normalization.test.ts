@@ -636,6 +636,18 @@ describe("type-def default presets via the gate seam", () => {
     expect(computeRawInternalValue({ pick: null }, pickSetting)).toBe("None");
   });
 
+  it("the built-in boolean type-def ships BOOLEAN_PRESETS so a preset-less boolean is toggleable", () => {
+    // A boolean with no explicit presets must still surface both choices — without the type-def
+    // default, the value picker would show only the current value (nothing to toggle to).
+    const setting: SettingSchema = { id: "flag", label: "Flag", type: "boolean", defaultValue: false };
+    expect(resolveEffectivePresets(setting).pairs).toEqual([
+      ["true", true],
+      ["false", false],
+    ]);
+    expect(buildPresetItems(setting).map((p) => p.label)).toEqual(["true", "false"]);
+    expect(buildPresetItems(setting).map((p) => p.rawValue)).toEqual([true, false]);
+  });
+
   it("setting.presets (static array) overrides the type-def default", () => {
     const setting: SettingSchema = {
       id: "x",

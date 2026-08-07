@@ -221,6 +221,18 @@ const stringType: TypeDefinition<string> = {
   errorMessage: "Select a value",
 };
 
+/**
+ * The boolean choices, as `[label, value]` preset pairs (label equals value). The default
+ * `presets` for the `boolean` type — a consumer writes only `{ type: "boolean" }` and gets
+ * these without declaring `presets` (overridable per-setting: replace, not merge). Without
+ * them a boolean resolves to no presets, so the value picker would surface only the current
+ * value (e.g. just "False") with nothing to toggle to.
+ */
+export const BOOLEAN_PRESETS = [
+  ["true", true],
+  ["false", false],
+] as const satisfies readonly PresetPair[];
+
 const booleanType: TypeDefinition<boolean> = {
   id: "boolean",
   valueType: "boolean",
@@ -230,6 +242,7 @@ const booleanType: TypeDefinition<boolean> = {
     return undefined;
   },
   format: (value) => String(value),
+  presets: BOOLEAN_PRESETS,
   supportsCustomValues: false,
   errorMessage: "Select true or false",
 };

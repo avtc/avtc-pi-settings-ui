@@ -7,6 +7,7 @@ import { captureCtx } from "../src/ctx-store.js";
 import type { PresetPair } from "../src/schema.js";
 import type { TypeContext, TypeDefinition } from "../src/type-definitions.js";
 import {
+  BOOLEAN_PRESETS,
   coerceTypedValue,
   formatRawForDisplay,
   getTypeDefinition,
@@ -192,6 +193,14 @@ describe("string type", () => {
 
 describe("boolean type", () => {
   const t = getTypeDefinition("boolean");
+
+  it("ships BOOLEAN_PRESETS as its default presets (2 choices, label = value)", () => {
+    expect(BOOLEAN_PRESETS).toEqual([
+      ["true", true],
+      ["false", false],
+    ]);
+    expect(t.presets).toEqual(BOOLEAN_PRESETS);
+  });
 
   it("parses true/false strings", () => {
     expect(t.parse("true", EMPTY_CTX)).toBe(true);
