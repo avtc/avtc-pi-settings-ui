@@ -1,6 +1,6 @@
 {
   "name": "avtc-pi-settings-ui",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "A schema-driven settings UI for pi extensions — define your settings, get a tabbed modal, a /<name>:settings command, and layered persistence.",
   "type": "module",
   "main": "./index.ts",
@@ -28,8 +28,8 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.0",
-    "@earendil-works/pi-coding-agent": "^0.80.10",
-    "@earendil-works/pi-tui": "^0.80.10",
+    "@earendil-works/pi-coding-agent": "^0.84.1",
+    "@earendil-works/pi-tui": "^0.84.1",
     "@types/node": "^25.9.3",
     "jscpd": "^5.0.10",
     "knip": "^6.17.1",
