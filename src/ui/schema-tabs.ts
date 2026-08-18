@@ -127,6 +127,8 @@ export function buildSchemaTabGroups(
         type: settingSchema.type,
         description: settingSchema.description,
         presets: presetItems,
+        supportsCustomValues:
+          settingSchema.supportsCustomValues ?? getTypeDefinition(settingSchema.type).supportsCustomValues,
       });
     }
 

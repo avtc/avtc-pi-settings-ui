@@ -94,6 +94,13 @@ export function resolveSettingValue(raw: Record<string, unknown>, setting: Setti
 
   const typeDef = getTypeDefinition(setting.type);
 
+  // 3b. Empty string on a string-typed setting WITHOUT a null pair → null (unset). The null
+  //     display for preset-less strings IS the empty string, so this is what makes that
+  //     display round-trip: re-applying it unsets rather than storing a literal "".
+  if (value === "" && typeDef.valueType === "string" && nullLabel === undefined) {
+    value = null;
+  }
+
   // 4. null validity — keep null iff a null-preset exists (nullLabel derived from the effective
   //    presets). A type with no null-preset rejects null. Legitimate nulls never reach parse.
   if (value === null) {
@@ -101,9 +108,12 @@ export function resolveSettingValue(raw: Record<string, unknown>, setting: Setti
   }
 
   // 5. parse-if-string. Parse is string-only by signature; raw numbers/booleans
-  //    never enter it.
+  //    never enter it. An open-value override (supportsCustomValues: true) parses with the
+  //    presets stripped — preset matching is a UI affordance there, not a validity gate.
   if (typeof value === "string") {
-    const p = typeDef.parse(value, buildTypeContext(setting));
+    const openCtx: TypeContext = { presets: [], min: setting.min, max: setting.max };
+    const ctx = setting.supportsCustomValues === true ? openCtx : buildTypeContext(setting);
+    const p = typeDef.parse(value, ctx);
     if (p === undefined) return INVALID;
     value = p;
   }
@@ -275,9 +285,11 @@ export function getEffectiveValue(raw: Record<string, unknown>, setting: Setting
 export function computeRawInternalValue(settings: Record<string, unknown>, setting: SettingSchema): string {
   const value = settings[setting.id];
   if (value === null || value === undefined) {
-    // Display fallback only — the null label for nullable settings, or "Infinite" defensively
-    // for non-nullable settings that shouldn't hold null anyway.
-    return resolveNullLabel(setting) ?? "Infinite";
+    // Null display: the null-preset label when the setting has one, else a per-type fallback —
+    // "Infinite" for numeric/timeout-like values (null = no limit), EMPTY for strings (null =
+    // unset; a bare "Infinite" label is a number-ism that reads as a bogus string value).
+    if (resolveNullLabel(setting) !== undefined) return resolveNullLabel(setting) as string;
+    return getTypeDefinition(setting.type).valueType === "string" ? "" : "Infinite";
   }
   return String(value);
 }

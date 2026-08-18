@@ -195,11 +195,13 @@ export class SettingsTabsModal implements Component {
         const rawValue = item.value ?? "";
         const itemPresets = item.presets;
         const itemType = item.type;
+        const itemSupportsCustom = item.supportsCustomValues;
         tuiItem.submenu = (_currentValue, done) => {
           return new ValuePickerSubmenu(
             itemPresets,
             rawValue,
             itemType,
+            itemSupportsCustom,
             this.theme,
             (selectedValue) => {
               if (selectedValue !== undefined) {

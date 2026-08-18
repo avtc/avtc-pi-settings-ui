@@ -6,11 +6,14 @@ import {
   buildPresetItems,
   buildPresetItemsFromPairs,
   computeRawInternalValue,
+  getEffectiveValue,
+  isInvalidResult,
   normalizeFromSchema,
   normalizePresetElements,
   resolveEffectivePresets,
   resolveNullLabel,
   resolveNullLabelFromPairs,
+  resolveSettingValue,
   resolveStaticPresets,
   resolveValueAlias,
   validateSchema,
@@ -996,5 +999,47 @@ describe("validateSchema", () => {
       [{ label: "Tab", settingIds: ["n"] }],
     );
     expect(() => createSettingsExtension(orphan, {})).toThrow(/setting 'x' is not placed in any tab/);
+  });
+});
+
+describe("supportsCustomValues override + string null display", () => {
+  const pathSetting: SettingSchema = {
+    id: "pathSetting",
+    label: "Path",
+    type: "string",
+    defaultValue: null,
+  };
+  const closedEnum: SettingSchema = {
+    id: "mode",
+    label: "Mode",
+    type: "string",
+    defaultValue: "a",
+    presets: [
+      ["a", "a"],
+      ["b", "b"],
+    ],
+  };
+  const openEnum: SettingSchema = { ...closedEnum, supportsCustomValues: true };
+
+  it("renders a null preset-less string as empty; numeric types keep Infinite", () => {
+    expect(computeRawInternalValue({ pathSetting: null }, pathSetting)).toBe("");
+    const num: SettingSchema = { id: "n", label: "N", type: "number", defaultValue: 3 };
+    expect(computeRawInternalValue({ n: null }, num)).toBe("Infinite");
+  });
+
+  it("empty string on a preset-less string resolves to unset (default), not a literal empty value", () => {
+    expect(isInvalidResult(resolveSettingValue({ pathSetting: "" }, pathSetting))).toBe(true);
+    expect(getEffectiveValue({ pathSetting: "" }, pathSetting)).toBeNull();
+  });
+
+  it("override true opens a closed string enum at the gate (free text valid, presets still valid)", () => {
+    expect(isInvalidResult(resolveSettingValue({ mode: "custom-x" }, closedEnum))).toBe(true);
+    expect(resolveSettingValue({ mode: "custom-x" }, openEnum)).toBe("custom-x");
+    expect(resolveSettingValue({ mode: "b" }, openEnum)).toBe("b");
+  });
+
+  it("override absent keeps the enum closed (free text invalid)", () => {
+    expect(resolveSettingValue({ mode: "b" }, closedEnum)).toBe("b");
+    expect(isInvalidResult(resolveSettingValue({ mode: "custom-x" }, closedEnum))).toBe(true);
   });
 });

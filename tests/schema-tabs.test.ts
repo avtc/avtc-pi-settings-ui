@@ -68,11 +68,19 @@ const TEST_SCHEMA: SettingsSchema = {
       defaultValue: "100",
       description: "Test compact",
     },
+    {
+      id: "pathSetting",
+      label: "Path",
+      type: "string",
+      defaultValue: null,
+      supportsCustomValues: true,
+      description: "Test free-form path",
+    },
   ],
   tabs: [
     {
       label: "Test",
-      settingIds: ["timeoutMs", "durationDays", "enumSetting", "presetSetting", "compactThreshold"],
+      settingIds: ["timeoutMs", "durationDays", "enumSetting", "presetSetting", "compactThreshold", "pathSetting"],
     },
   ],
   globalPath: () => "/tmp/test.json",
@@ -224,7 +232,7 @@ describe("buildSchemaTabGroups", () => {
     };
     const tabs = buildSchemaTabGroups(settings, TEST_SCHEMA, null);
     // uiVisible was removed — every setting declared in a tab is shown.
-    expect(tabs[0].settings.length).toBe(5);
+    expect(tabs[0].settings.length).toBe(6); // pathSetting added below
   });
 
   it("skips unknown settingIds gracefully", () => {
@@ -317,8 +325,9 @@ describe("buildSchemaTabGroups with resolved function-presets", () => {
     expect(item?.displayValue).toBe("Default");
   });
 
-  it("a function-presets setting whose resolved pairs have NO null pair keeps 'Infinite'", () => {
-    // No null pair in the resolved list → no resolved null label → the raw "Infinite" stands.
+  it("a function-presets STRING setting whose resolved pairs have NO null pair shows empty", () => {
+    // No null pair in the resolved list → no resolved null label → the per-type null fallback
+    // stands: EMPTY for strings (null = unset), "Infinite" only for numeric/timeout-like types.
     const schema = resolverSchema();
     const resolvedPairs = new Map<string, PresetPair[]>([
       [
@@ -333,7 +342,7 @@ describe("buildSchemaTabGroups with resolved function-presets", () => {
     const tabs = buildSchemaTabGroups({ pick: null }, schema, resolvedPairs);
 
     const item = tabs[0].settings.find((s) => s.id === "pick");
-    expect(item?.value).toBe("Infinite");
+    expect(item?.value).toBe("");
   });
 
   it("static-array presets are byte-for-byte unchanged when resolvedPairs is null", () => {
@@ -366,7 +375,7 @@ describe("buildSchemaTabGroups with resolved function-presets", () => {
     const tabs = buildSchemaTabGroups({ pick: null }, schema, null);
 
     const item = tabs[0].settings.find((s) => s.id === "pick");
-    expect(item?.value).toBe("Infinite");
+    expect(item?.value).toBe("");
   });
 
   it("does not mistake a literal 'Infinite' string value for a null (structural null check)", () => {
@@ -388,5 +397,38 @@ describe("buildSchemaTabGroups with resolved function-presets", () => {
     const item = tabs[0].settings.find((s) => s.id === "pick");
     // The value stays the literal "Infinite" — not overridden to "Default".
     expect(item?.value).toBe("Infinite");
+  });
+});
+
+describe("buildSchemaTabGroups — custom-values flag + null string display", () => {
+  it("resolves the effective supportsCustomValues per setting (override > type default)", () => {
+    const settings = {
+      timeoutMs: 300000,
+      durationDays: 86400000,
+      enumSetting: "a",
+      presetSetting: 3,
+      compactThreshold: "compact>100K",
+      pathSetting: null,
+    };
+    const tabs = buildSchemaTabGroups(settings, TEST_SCHEMA, null);
+    const by = (id: string) => tabs[0].settings.find((s) => s.id === id);
+    expect(by("pathSetting")?.supportsCustomValues).toBe(true); // override
+    expect(by("enumSetting")?.supportsCustomValues).toBe(false); // closed string type
+    expect(by("presetSetting")?.supportsCustomValues).toBe(true); // open number type
+  });
+
+  it("renders a null preset-less string as empty (not Infinite)", () => {
+    const settings = {
+      timeoutMs: 300000,
+      durationDays: 86400000,
+      enumSetting: "a",
+      presetSetting: 3,
+      compactThreshold: "compact>100K",
+      pathSetting: null,
+    };
+    const tabs = buildSchemaTabGroups(settings, TEST_SCHEMA, null);
+    const item = tabs[0].settings.find((s) => s.id === "pathSetting");
+    expect(item?.value).toBe("");
+    expect(item?.displayValue).toBe("");
   });
 });

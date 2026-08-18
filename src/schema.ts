@@ -61,6 +61,12 @@ export interface SettingSchema<T = unknown> {
    * atomic pass.
    */
   presets?: PresetsSource;
+  /** Open-value override for this setting. `true` = the setting accepts arbitrary values:
+   * the value picker offers a free-form "Custom value…" row and the gate's parse treats the
+   * raw value as open (preset matching not enforced). `false`/absent = the type-def's
+   * `supportsCustomValues` governs (string enums stay closed). The type's base parse still
+   * applies — e.g. a `number` setting parses integers regardless of this flag. */
+  supportsCustomValues?: boolean;
   /** Backward-compat field names (old keys that map to this setting's canonical id). */
   aliases?: string[];
   /** Legacy value aliases: old value → current raw value. Resolved before value-based matching. */
@@ -112,6 +118,9 @@ export interface SettingItem {
   description?: string;
   /** Cohesive preset list (labels + raw values + display strings derived from `presets` pairs). */
   presets?: readonly PresetItem[];
+  /** Effective open-value flag: the setting's `supportsCustomValues` override, else the
+   * type-def's flag. Drives the picker's "Custom value…" row. */
+  supportsCustomValues: boolean;
 }
 
 // ── Storage levels (which persistence targets a settings handle offers) ─────────

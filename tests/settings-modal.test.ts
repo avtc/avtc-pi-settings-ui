@@ -22,16 +22,30 @@ function buildTwoTabs(): TabDefinition[] {
     {
       label: "General",
       settings: [
-        { id: "name", label: "Name", value: "alpha", displayValue: "alpha", type: "string" },
-        { id: "mode", label: "Mode", value: "beta", displayValue: "beta", type: "string" },
-        { id: "count", label: "Count", value: "3", displayValue: "3", type: "number" },
+        {
+          id: "name",
+          label: "Name",
+          value: "alpha",
+          displayValue: "alpha",
+          type: "string",
+          supportsCustomValues: false,
+        },
+        { id: "mode", label: "Mode", value: "beta", displayValue: "beta", type: "string", supportsCustomValues: false },
+        { id: "count", label: "Count", value: "3", displayValue: "3", type: "number", supportsCustomValues: false },
       ],
     },
     {
       label: "Advanced",
       settings: [
-        { id: "debug", label: "Debug", value: "true", displayValue: "true", type: "boolean" },
-        { id: "path", label: "Path", value: "/x", displayValue: "/x", type: "string" },
+        {
+          id: "debug",
+          label: "Debug",
+          value: "true",
+          displayValue: "true",
+          type: "boolean",
+          supportsCustomValues: false,
+        },
+        { id: "path", label: "Path", value: "/x", displayValue: "/x", type: "string", supportsCustomValues: false },
       ],
     },
   ];
@@ -45,14 +59,31 @@ function buildThreeMatchingTabs(): TabDefinition[] {
     {
       label: "T",
       settings: [
-        { id: "xone", label: "Xone", value: "xone", displayValue: "xone", type: "string", description: "xone-desc" },
-        { id: "atwo", label: "Atwo", value: "atwo", displayValue: "atwo", type: "string", description: "atwo-desc" },
+        {
+          id: "xone",
+          label: "Xone",
+          value: "xone",
+          displayValue: "xone",
+          type: "string",
+          description: "xone-desc",
+          supportsCustomValues: false,
+        },
+        {
+          id: "atwo",
+          label: "Atwo",
+          value: "atwo",
+          displayValue: "atwo",
+          type: "string",
+          description: "atwo-desc",
+          supportsCustomValues: false,
+        },
         {
           id: "athree",
           label: "Athree",
           value: "athree",
           displayValue: "athree",
           type: "string",
+          supportsCustomValues: false,
           description: "athree-desc",
         },
       ],
@@ -80,6 +111,7 @@ describe("SettingsTabsModal — top filter field + Tab/Shift+Tab nav", () => {
               value: "a",
               displayValue: "a",
               type: "string",
+              supportsCustomValues: false,
               presets: [
                 { label: "A", rawValue: "a", displayValue: "a" },
                 { label: "B", rawValue: "b", displayValue: "b" },
@@ -114,6 +146,7 @@ describe("SettingsTabsModal — top filter field + Tab/Shift+Tab nav", () => {
               value: "a",
               displayValue: "a",
               type: "string",
+              supportsCustomValues: false,
               description: "mode-help-text",
               presets: [
                 { label: "A", rawValue: "a", displayValue: "a" },
@@ -154,8 +187,9 @@ describe("SettingsTabsModal — top filter field + Tab/Shift+Tab nav", () => {
               value: edited ? "Infinite" : "30s",
               displayValue: edited ? "Infinite" : "30s",
               type: "string",
+              supportsCustomValues: false,
             },
-            { id: "nm", label: "Name", value: "abc", displayValue: "abc", type: "string" },
+            { id: "nm", label: "Name", value: "abc", displayValue: "abc", type: "string", supportsCustomValues: false },
           ],
         },
       ];
@@ -321,6 +355,7 @@ describe("SettingsTabsModal — top filter field + Tab/Shift+Tab nav", () => {
         value: String(i),
         displayValue: String(i),
         type: "string" as const,
+        supportsCustomValues: false,
       }));
       const modal = new SettingsTabsModal(
         {
@@ -566,8 +601,16 @@ describe("SettingsTabsModal — top filter field + Tab/Shift+Tab nav", () => {
         {
           label: "Models",
           settings: [
-            { id: "m", label: "Model", value: "prov/model-0", displayValue: "prov/model-0", type: "model", presets },
-            { id: "x", label: "Other", value: "a", displayValue: "a", type: "string" },
+            {
+              id: "m",
+              label: "Model",
+              value: "prov/model-0",
+              displayValue: "prov/model-0",
+              type: "model",
+              presets,
+              supportsCustomValues: false,
+            },
+            { id: "x", label: "Other", value: "a", displayValue: "a", type: "string", supportsCustomValues: false },
           ],
         },
       ];

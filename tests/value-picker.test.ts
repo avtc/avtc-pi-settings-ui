@@ -47,7 +47,7 @@ describe('ValuePickerSubmenu — "Custom value…" entry gating', () => {
       ["off", "ask", "block", "ask-allow-15m", "ask-block-15m"],
       NO_DISPLAY_VALUES,
     );
-    const picker = new ValuePickerSubmenu(presets, "ask", "string", theme, () => {}, PICKER_VIEWPORT_MAX);
+    const picker = new ValuePickerSubmenu(presets, "ask", "string", false, theme, () => {}, PICKER_VIEWPORT_MAX);
 
     const out = renderFlat(picker, DEFAULT_WIDTH);
     expect(out).not.toContain("Custom value…");
@@ -59,7 +59,7 @@ describe('ValuePickerSubmenu — "Custom value…" entry gating', () => {
 
   test('numeric type DOES show "Custom value…"', () => {
     const presets = buildPresets(["1", "2", "3", "5", "10"], [1, 2, 3, 5, 10], NO_DISPLAY_VALUES);
-    const picker = new ValuePickerSubmenu(presets, "3", "number", theme, () => {}, PICKER_VIEWPORT_MAX);
+    const picker = new ValuePickerSubmenu(presets, "3", "number", true, theme, () => {}, PICKER_VIEWPORT_MAX);
 
     expect(renderFlat(picker, DEFAULT_WIDTH)).toContain("Custom value…");
   });
@@ -70,7 +70,7 @@ describe('ValuePickerSubmenu — "Custom value…" entry gating', () => {
       [300000, 900000, 1800000, 3600000],
       ["5m", "15m", "30m", "1h"],
     );
-    const picker = new ValuePickerSubmenu(presets, "5m", "duration", theme, () => {}, PICKER_VIEWPORT_MAX);
+    const picker = new ValuePickerSubmenu(presets, "5m", "duration", true, theme, () => {}, PICKER_VIEWPORT_MAX);
 
     expect(renderFlat(picker, DEFAULT_WIDTH)).toContain("Custom value…");
   });
@@ -81,6 +81,7 @@ describe('ValuePickerSubmenu — "Custom value…" entry gating', () => {
       presets,
       "compact>75K",
       "compact-threshold",
+      true,
       theme,
       () => {},
       PICKER_VIEWPORT_MAX,
@@ -94,7 +95,7 @@ describe('ValuePickerSubmenu — "Custom value…" entry gating', () => {
     // (e.g. 'Infinite'). The label matches no preset, so the custom-indicator path runs and must
     // render the label verbatim — NOT feed it through formatHumanDuration (which would yield 'NaN').
     const presets = buildPresets(["5m", "10m", "30m"], [300000, 600000, 1800000], NO_DISPLAY_VALUES);
-    const picker = new ValuePickerSubmenu(presets, "Infinite", "duration", theme, () => {}, PICKER_VIEWPORT_MAX);
+    const picker = new ValuePickerSubmenu(presets, "Infinite", "duration", true, theme, () => {}, PICKER_VIEWPORT_MAX);
     const out = renderFlat(picker, DEFAULT_WIDTH);
     expect(out).toContain("◆ Infinite");
     expect(out).not.toContain("NaN");
@@ -110,6 +111,7 @@ describe("ValuePickerSubmenu — string enum selection + legacy value", () => {
       presets,
       "off",
       "string",
+      false,
       theme,
       (v) => captured.push(v),
       PICKER_VIEWPORT_MAX,
@@ -127,6 +129,7 @@ describe("ValuePickerSubmenu — string enum selection + legacy value", () => {
       presets,
       "garbage-legacy",
       "string",
+      false,
       theme,
       (v) => captured.push(v),
       PICKER_VIEWPORT_MAX,
@@ -151,6 +154,7 @@ describe("ValuePickerSubmenu — string enum selection + legacy value", () => {
       presets,
       "Infinite",
       "number",
+      true,
       theme,
       (v) => captured.push(v),
       PICKER_VIEWPORT_MAX,
@@ -164,7 +168,15 @@ describe("ValuePickerSubmenu — string enum selection + legacy value", () => {
   test("confirming a numeric preset fires done(numeric)", () => {
     const presets = buildPresets(["Infinite", "2", "6"], [null, 2, 6], ["Infinite", "2", "6"]);
     const captured: unknown[] = [];
-    const picker = new ValuePickerSubmenu(presets, "2", "number", theme, (v) => captured.push(v), PICKER_VIEWPORT_MAX);
+    const picker = new ValuePickerSubmenu(
+      presets,
+      "2",
+      "number",
+      true,
+      theme,
+      (v) => captured.push(v),
+      PICKER_VIEWPORT_MAX,
+    );
 
     // Default selection is "2" → index 1. Confirm it.
     picker.handleInput("\r");
@@ -176,7 +188,7 @@ describe("ValuePickerSubmenu — custom input", () => {
   beforeAll(() => initTheme());
   test("invalid custom input shows the TypeDefinition.errorMessage", () => {
     const presets = buildPresets(["1", "2", "3"], [1, 2, 3], NO_DISPLAY_VALUES);
-    const picker = new ValuePickerSubmenu(presets, "2", "number", theme, () => {}, PICKER_VIEWPORT_MAX);
+    const picker = new ValuePickerSubmenu(presets, "2", "number", true, theme, () => {}, PICKER_VIEWPORT_MAX);
     // currentRawValue "2" → active preset at visibleEntries index 2 (offset by the pinned Custom
     // row above). Two Downs wrap to the Custom row (index 0): 2 → 3 → 0.
     picker.handleInput("\x1b[B"); // down → index 3 (preset "3")
@@ -191,7 +203,15 @@ describe("ValuePickerSubmenu — custom input", () => {
   test("valid custom input fires done with the formatted internal value", () => {
     const presets = buildPresets(["1", "2", "3"], [1, 2, 3], NO_DISPLAY_VALUES);
     const captured: unknown[] = [];
-    const picker = new ValuePickerSubmenu(presets, "2", "number", theme, (v) => captured.push(v), PICKER_VIEWPORT_MAX);
+    const picker = new ValuePickerSubmenu(
+      presets,
+      "2",
+      "number",
+      true,
+      theme,
+      (v) => captured.push(v),
+      PICKER_VIEWPORT_MAX,
+    );
     picker.handleInput("\x1b[B"); // down → index 3 (preset "3")
     picker.handleInput("\x1b[B"); // down → index 0 (Custom value…, wrap)
     picker.handleInput("\r"); // text-entry mode
@@ -207,6 +227,7 @@ describe("ValuePickerSubmenu — custom input", () => {
       presets,
       "compact>150K",
       "compact-threshold",
+      true,
       theme,
       () => {},
       PICKER_VIEWPORT_MAX,
@@ -225,6 +246,7 @@ describe("ValuePickerSubmenu — UD5 constructor (pi Theme param)", () => {
       presets,
       "a",
       "string",
+      false,
       piThemeStub as unknown as Theme,
       () => {},
       PICKER_VIEWPORT_MAX,
@@ -242,7 +264,7 @@ describe("ValuePickerSubmenu — filter-first renderer", () => {
 
   test("renders a filter field at the top", () => {
     const presets = buildPresets(["Alpha", "Beta", "Gamma"], ["a", "b", "g"], NO_DISPLAY_VALUES);
-    const picker = new ValuePickerSubmenu(presets, "a", "string", theme, () => {}, PICKER_VIEWPORT_MAX);
+    const picker = new ValuePickerSubmenu(presets, "a", "string", false, theme, () => {}, PICKER_VIEWPORT_MAX);
     const lines = picker.render(DEFAULT_WIDTH);
     // The first line is the filter field (not the first preset). At least the presets render below.
     const joined = lines.join("\n");
@@ -252,7 +274,7 @@ describe("ValuePickerSubmenu — filter-first renderer", () => {
 
   test("typing a filter narrows the list (substring on label or value) and focuses the first match", () => {
     const presets = buildPresets(["Alpha", "Beta", "Gamma"], ["a", "b", "g"], NO_DISPLAY_VALUES);
-    const picker = new ValuePickerSubmenu(presets, "a", "string", theme, () => {}, PICKER_VIEWPORT_MAX);
+    const picker = new ValuePickerSubmenu(presets, "a", "string", false, theme, () => {}, PICKER_VIEWPORT_MAX);
     picker.handleInput("b"); // filter 'b' — matches 'Beta' (label 'Beta' AND rawValue 'b')
     const joined = picker.render(DEFAULT_WIDTH).join("\n");
     expect(joined).toContain("Beta");
@@ -271,7 +293,7 @@ describe("ValuePickerSubmenu — maxVisible viewport cap", () => {
       Array.from({ length: 15 }, (_, i) => `p${i}`),
       NO_DISPLAY_VALUES,
     );
-    const picker = new ValuePickerSubmenu(presets, "p0", "string", theme, () => {}, PICKER_VIEWPORT_MAX);
+    const picker = new ValuePickerSubmenu(presets, "p0", "string", false, theme, () => {}, PICKER_VIEWPORT_MAX);
     const lines = picker.render(DEFAULT_WIDTH);
     // Picker body = 1 filter + N preset rows + 1 hint. With the cap at 10, exactly 10 presets render.
     const presetLines = lines.filter((l) => /P\d+/.test(l));
@@ -287,7 +309,7 @@ describe("ValuePickerSubmenu — maxVisible viewport cap", () => {
       Array.from({ length: 15 }, (_, i) => `p${i}`),
       NO_DISPLAY_VALUES,
     );
-    const picker = new ValuePickerSubmenu(presets, "p0", "string", theme, () => {}, 4);
+    const picker = new ValuePickerSubmenu(presets, "p0", "string", false, theme, () => {}, 4);
     const lines = picker.render(DEFAULT_WIDTH);
     const presetLines = lines.filter((l) => /P\d+/.test(l));
     expect(presetLines).toHaveLength(4);
@@ -301,7 +323,7 @@ describe("ValuePickerSubmenu — maxVisible viewport cap", () => {
       Array.from({ length: 12 }, (_, i) => `p${i}`),
       NO_DISPLAY_VALUES,
     );
-    const picker = new ValuePickerSubmenu(presets, "p0", "string", theme, () => {}, 5);
+    const picker = new ValuePickerSubmenu(presets, "p0", "string", false, theme, () => {}, 5);
     // Walk down to P7 (index 7). A centered 5-row window shows P5..P9 (P7 in the middle).
     for (let i = 0; i < 7; i++) picker.handleInput("\x1b[B"); // Down x7
     const joined = picker.render(DEFAULT_WIDTH).join("\n");
@@ -321,7 +343,7 @@ describe("ValuePickerSubmenu — centered viewport + scroll indicator", () => {
       Array.from({ length: 12 }, (_, i) => `p${i}`),
       NO_DISPLAY_VALUES,
     );
-    const picker = new ValuePickerSubmenu(presets, "p0", "string", theme, () => {}, 5);
+    const picker = new ValuePickerSubmenu(presets, "p0", "string", false, theme, () => {}, 5);
     for (let i = 0; i < 5; i++) picker.handleInput("\x1b[B"); // Down x5 -> P5 (index 5)
     const lines = picker.render(DEFAULT_WIDTH);
     const has = (label: string) => lines.some((l) => l.includes(label));
@@ -337,7 +359,7 @@ describe("ValuePickerSubmenu — centered viewport + scroll indicator", () => {
       Array.from({ length: 12 }, (_, i) => `p${i}`),
       NO_DISPLAY_VALUES,
     );
-    const picker = new ValuePickerSubmenu(presets, "p0", "string", theme, () => {}, 5);
+    const picker = new ValuePickerSubmenu(presets, "p0", "string", false, theme, () => {}, 5);
     const lines = picker.render(DEFAULT_WIDTH);
     const has = (label: string) => lines.some((l) => l.includes(label));
     // Selection P0 (index 0): window pins to the top -> P0..P4, no row above P0.
@@ -351,7 +373,7 @@ describe("ValuePickerSubmenu — centered viewport + scroll indicator", () => {
       Array.from({ length: 15 }, (_, i) => `p${i}`),
       NO_DISPLAY_VALUES,
     );
-    const picker = new ValuePickerSubmenu(presets, "p0", "string", theme, () => {}, 5);
+    const picker = new ValuePickerSubmenu(presets, "p0", "string", false, theme, () => {}, 5);
     const lines = picker.render(DEFAULT_WIDTH);
     // Selection P0 (index 0) of 15 -> "(1/15)" appended to the hint line (inline, not a new row).
     expect(lines.some((l) => l.includes("Enter to select") && /\(1\/15\)/.test(l))).toBe(true);
@@ -363,7 +385,7 @@ describe("ValuePickerSubmenu — centered viewport + scroll indicator", () => {
       Array.from({ length: 15 }, (_, i) => `p${i}`),
       NO_DISPLAY_VALUES,
     );
-    const picker = new ValuePickerSubmenu(presets, "p0", "string", theme, () => {}, 5);
+    const picker = new ValuePickerSubmenu(presets, "p0", "string", false, theme, () => {}, 5);
     for (let i = 0; i < 7; i++) picker.handleInput("\x1b[B"); // -> P7 (index 7) -> "(8/15)"
     const lines = picker.render(DEFAULT_WIDTH);
     expect(lines.some((l) => /\(8\/15\)/.test(l))).toBe(true);
@@ -375,7 +397,7 @@ describe("ValuePickerSubmenu — centered viewport + scroll indicator", () => {
       Array.from({ length: 3 }, (_, i) => `p${i}`),
       NO_DISPLAY_VALUES,
     );
-    const picker = new ValuePickerSubmenu(presets, "p0", "string", theme, () => {}, 5);
+    const picker = new ValuePickerSubmenu(presets, "p0", "string", false, theme, () => {}, 5);
     const joined = picker.render(DEFAULT_WIDTH).join("\n");
     // 3 presets under a 5-row cap -> nothing scrolls -> no "(n/N)" indicator.
     expect(joined).not.toMatch(/\(\d+\/\d+\)/);
@@ -389,7 +411,7 @@ describe("ValuePickerSubmenu — centered viewport + scroll indicator", () => {
       Array.from({ length: 15 }, (_, i) => `p${i}`),
       NO_DISPLAY_VALUES,
     );
-    const picker = new ValuePickerSubmenu(presets, "p0", "string", theme, () => {}, 5);
+    const picker = new ValuePickerSubmenu(presets, "p0", "string", false, theme, () => {}, 5);
     const lines = picker.render(DEFAULT_WIDTH);
     // 1 filter + 5 preset rows + 1 hint (with inline indicator) = 7.
     expect(lines.length).toBe(7);
@@ -402,7 +424,7 @@ describe("ValuePickerSubmenu — pinned rows + two-state custom field", () => {
   test("the custom-indicator (current value absent from presets) is pinned and exempt from the filter", () => {
     const presets = buildPresets(["Alpha", "Beta"], ["a", "b"], NO_DISPLAY_VALUES);
     // 'garbage' is absent from presets → custom-indicator (◆) appears, pinned + exempt from filter.
-    const picker = new ValuePickerSubmenu(presets, "garbage", "string", theme, () => {}, PICKER_VIEWPORT_MAX);
+    const picker = new ValuePickerSubmenu(presets, "garbage", "string", false, theme, () => {}, PICKER_VIEWPORT_MAX);
     picker.handleInput("z"); // filter 'z' matches nothing
     const joined = picker.render(DEFAULT_WIDTH).join("\n");
     // The custom-indicator survives the filter (it is pinned, exempt).
@@ -412,7 +434,7 @@ describe("ValuePickerSubmenu — pinned rows + two-state custom field", () => {
 
   test("selecting the 'Custom…' row (Up/Down + Enter) enters text-entry state; Esc restores the filter", () => {
     const presets = buildPresets(["5", "10"], ["5", "10"], NO_DISPLAY_VALUES);
-    const picker = new ValuePickerSubmenu(presets, "5", "number", theme, () => {}, PICKER_VIEWPORT_MAX);
+    const picker = new ValuePickerSubmenu(presets, "5", "number", true, theme, () => {}, PICKER_VIEWPORT_MAX);
     // Type a filter first ('1' → narrows to '10'), then navigate to the Custom row + Enter.
     picker.handleInput("1"); // filter '1' → matches '10'; list is [10, Custom value…]
     const beforeSnap = (picker as unknown as { filterInput: { getValue(): string } }).filterInput.getValue();
@@ -440,6 +462,7 @@ describe("ValuePickerSubmenu — routing (filter mode)", () => {
       presets,
       "a",
       "string",
+      false,
       theme,
       done as unknown as (value?: unknown) => void,
       PICKER_VIEWPORT_MAX,
@@ -463,6 +486,7 @@ describe("ValuePickerSubmenu — routing (filter mode)", () => {
       presets,
       "a",
       "string",
+      false,
       theme,
       done as unknown as (value?: unknown) => void,
       PICKER_VIEWPORT_MAX,
@@ -476,7 +500,7 @@ describe("ValuePickerSubmenu — routing (filter mode)", () => {
 
   test("Left/Right move the filter cursor (not selection)", () => {
     const presets = buildPresets(["Alpha", "Beta"], ["a", "b"], NO_DISPLAY_VALUES);
-    const picker = new ValuePickerSubmenu(presets, "a", "string", theme, () => {}, PICKER_VIEWPORT_MAX);
+    const picker = new ValuePickerSubmenu(presets, "a", "string", false, theme, () => {}, PICKER_VIEWPORT_MAX);
     picker.handleInput("a");
     picker.handleInput("b"); // 'ab' — Alpha no longer matches (no 'ab'), Beta no → empty
     // Move the cursor left (no selection change, no crash).
@@ -510,6 +534,7 @@ describe("ValuePickerSubmenu — muted model rendering", () => {
       presets,
       "anthropic/claude-3-5-sonnet",
       "model",
+      true,
       capturingTheme as unknown as Theme,
       () => {},
       PICKER_VIEWPORT_MAX,
@@ -542,6 +567,7 @@ describe("ValuePickerSubmenu — muted model rendering", () => {
       presets,
       "anthropic/claude-3-5-sonnet",
       "model",
+      true,
       capturingTheme as unknown as Theme,
       () => {},
       PICKER_VIEWPORT_MAX,
@@ -570,7 +596,15 @@ describe("ValuePickerSubmenu — model indicator and cursor no-reset", () => {
       },
     ];
     // 'anthropic/other' is absent → custom-indicator (◆) appears.
-    const picker = new ValuePickerSubmenu(presets, "anthropic/other", "model", theme, () => {}, PICKER_VIEWPORT_MAX);
+    const picker = new ValuePickerSubmenu(
+      presets,
+      "anthropic/other",
+      "model",
+      true,
+      theme,
+      () => {},
+      PICKER_VIEWPORT_MAX,
+    );
     const joined = picker.render(DEFAULT_WIDTH).join("\n");
     expect(joined).toContain("◆");
   });
@@ -578,7 +612,7 @@ describe("ValuePickerSubmenu — model indicator and cursor no-reset", () => {
   test("Left/Right move the filter cursor WITHOUT resetting the selection", () => {
     // Cursor movement that does not change the filter text must not reset selectedIndex.
     const presets = buildPresets(["Alpha", "Beta", "Gamma"], ["a", "b", "g"], NO_DISPLAY_VALUES);
-    const picker = new ValuePickerSubmenu(presets, "a", "string", theme, () => {}, PICKER_VIEWPORT_MAX);
+    const picker = new ValuePickerSubmenu(presets, "a", "string", false, theme, () => {}, PICKER_VIEWPORT_MAX);
     picker.handleInput("\x1b[B"); // Down → index 1 (Beta)
     const selBefore = (picker as unknown as { selectedIndex: number }).selectedIndex;
     expect(selBefore).toBe(1);
@@ -591,7 +625,7 @@ describe("ValuePickerSubmenu — model indicator and cursor no-reset", () => {
   test("the 'Custom value…' row sits ABOVE the filtered presets (pinned, like the indicator)", () => {
     // Both pinned rows (custom-indicator, Custom value…) are above the filtered list.
     const presets = buildPresets(["one", "two", "three"], [1, 2, 3], NO_DISPLAY_VALUES);
-    const picker = new ValuePickerSubmenu(presets, "1", "number", theme, () => {}, PICKER_VIEWPORT_MAX);
+    const picker = new ValuePickerSubmenu(presets, "1", "number", true, theme, () => {}, PICKER_VIEWPORT_MAX);
     const lines = picker.render(DEFAULT_WIDTH);
     // The Custom row must appear before the first preset row. (ANSI codes don't contain these
     // substrings, so no stripping is needed.)
@@ -608,7 +642,7 @@ describe("ValuePickerSubmenu — wrap-around, slash-split, custom-indicator cove
 
   test("Up/Down wrap around the filtered set + pinned rows", () => {
     const presets = buildPresets(["Alpha", "Beta"], ["a", "b"], NO_DISPLAY_VALUES);
-    const picker = new ValuePickerSubmenu(presets, "a", "string", theme, () => {}, PICKER_VIEWPORT_MAX);
+    const picker = new ValuePickerSubmenu(presets, "a", "string", false, theme, () => {}, PICKER_VIEWPORT_MAX);
     // visibleEntries for a closed string type = [Alpha, Beta] (no Custom row). selectedIndex
     // starts at the active preset 'a' (index 0). Up wraps to the last entry.
     picker.handleInput("\x1b[A"); // Up → wraps to last (Beta, index 1)
@@ -631,6 +665,7 @@ describe("ValuePickerSubmenu — wrap-around, slash-split, custom-indicator cove
       presets,
       "openai/o3/mini",
       "model",
+      true,
       capturingTheme as unknown as Theme,
       () => {},
       PICKER_VIEWPORT_MAX,
@@ -649,6 +684,7 @@ describe("ValuePickerSubmenu — wrap-around, slash-split, custom-indicator cove
       presets,
       "stale",
       "string",
+      false,
       theme,
       done as unknown as (value?: unknown) => void,
       PICKER_VIEWPORT_MAX,
@@ -666,7 +702,7 @@ describe("ValuePickerSubmenu — Esc focus-first-match", () => {
     // After Esc restores the filter, the selection should land on the first matching PRESET
     // (consistent with the picker's focus-first-match rule), not the pinned Custom row.
     const presets = buildPresets(["10", "20", "30"], [10, 20, 30], NO_DISPLAY_VALUES);
-    const picker = new ValuePickerSubmenu(presets, "10", "number", theme, () => {}, PICKER_VIEWPORT_MAX);
+    const picker = new ValuePickerSubmenu(presets, "10", "number", true, theme, () => {}, PICKER_VIEWPORT_MAX);
     // Filter '2' → matches '20' only. Enter text-entry via the Custom row, then Esc out.
     picker.handleInput("2"); // filter '2' → focus first match '20'
     const focusBefore = (picker as unknown as { selectedIndex: number }).selectedIndex;
@@ -689,7 +725,7 @@ describe("ValuePickerSubmenu — value-filter and filter-mode Esc cancel", () =>
       { label: "First", rawValue: "alpha", displayValue: "alpha" },
       { label: "Second", rawValue: "fox", displayValue: "fox" },
     ];
-    const picker = new ValuePickerSubmenu(presets, "alpha", "string", theme, () => {}, PICKER_VIEWPORT_MAX);
+    const picker = new ValuePickerSubmenu(presets, "alpha", "string", false, theme, () => {}, PICKER_VIEWPORT_MAX);
     picker.handleInput("x"); // 'x' is in rawValue 'fox' only (neither label has 'x')
     const joined = picker.render(DEFAULT_WIDTH).join("\n");
     expect(joined).toContain("Second");
@@ -705,11 +741,95 @@ describe("ValuePickerSubmenu — value-filter and filter-mode Esc cancel", () =>
       presets,
       "a",
       "string",
+      false,
       theme,
       done as unknown as (value?: unknown) => void,
       PICKER_VIEWPORT_MAX,
     );
     picker.handleInput("\x1b"); // Esc in filter mode → cancel
     expect(captured).toEqual(["CANCEL"]); // done() called with no value
+  });
+});
+
+describe("ValuePickerSubmenu — per-setting custom-values override", () => {
+  beforeAll(() => initTheme());
+  test('string type with the override enabled DOES show "Custom value…"', () => {
+    const presets = buildPresets(["a", "b"], ["a", "b"], NO_DISPLAY_VALUES);
+    const picker = new ValuePickerSubmenu(presets, "a", "string", true, theme, () => {}, PICKER_VIEWPORT_MAX);
+
+    expect(renderFlat(picker, DEFAULT_WIDTH)).toContain("Custom value…");
+  });
+
+  test("empty current raw value shows no custom-value indicator row (null string display)", () => {
+    const presets = buildPresets(["a", "b"], ["a", "b"], NO_DISPLAY_VALUES);
+    const picker = new ValuePickerSubmenu(presets, "", "string", true, theme, () => {}, PICKER_VIEWPORT_MAX);
+
+    expect(renderFlat(picker, DEFAULT_WIDTH)).not.toContain("◆");
+  });
+});
+
+describe("ValuePickerSubmenu — preset-less open setting opens directly in the editor", () => {
+  beforeAll(() => initTheme());
+
+  test("no presets + custom support → text-entry immediately, prefilled, no list rows", () => {
+    const picker = new ValuePickerSubmenu(
+      [],
+      "C:/scenario/ae2d92c1",
+      "string",
+      true,
+      theme,
+      () => {},
+      PICKER_VIEWPORT_MAX,
+    );
+    const out = renderFlat(picker, DEFAULT_WIDTH);
+    expect(out).toContain("custom:"); // the editor (hint + input), not the filter list
+    expect(out).not.toContain("Custom value…"); // no degenerate one-row list
+    // prefilled with the current value (cursor reverse-video splits the text — strip ANSI first)
+    const ansi = new RegExp(`${String.fromCharCode(27)}[[0-9;]*m`, "g");
+    expect(out.replace(ansi, "")).toContain("C:/scenario/ae2d92c1");
+  });
+
+  test("no presets + custom support + empty raw → empty editor; typed text submits on Enter", () => {
+    let submitted: unknown = "unset";
+    const picker = new ValuePickerSubmenu(
+      [],
+      "",
+      "string",
+      true,
+      theme,
+      (v) => {
+        submitted = v;
+      },
+      PICKER_VIEWPORT_MAX,
+    );
+    expect(renderFlat(picker, DEFAULT_WIDTH)).not.toContain("◆");
+    picker.handleInput("/tmp/x"); // typing goes straight into the editor
+    picker.handleInput("\r"); // Enter submits
+    expect(submitted).toBe("/tmp/x");
+  });
+
+  test("Esc in the direct editor closes the picker (no fallback list)", () => {
+    let closedWith: unknown = "not-called";
+    const picker = new ValuePickerSubmenu(
+      [],
+      "abc",
+      "string",
+      true,
+      theme,
+      (v) => {
+        closedWith = v;
+      },
+      PICKER_VIEWPORT_MAX,
+    );
+    picker.handleInput("\x1b"); // Esc
+    expect(closedWith).toBeUndefined(); // done() with no value = cancel
+  });
+
+  test("presets + custom support still open the filter list first", () => {
+    const presets = buildPresets(["a", "b"], ["a", "b"], NO_DISPLAY_VALUES);
+    const picker = new ValuePickerSubmenu(presets, "a", "string", true, theme, () => {}, PICKER_VIEWPORT_MAX);
+    const out = renderFlat(picker, DEFAULT_WIDTH);
+    expect(out).toContain("Custom value…"); // list first; the editor is behind it
+    expect(out).not.toContain("custom:");
   });
 });

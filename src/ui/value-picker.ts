@@ -51,6 +51,11 @@ export class ValuePickerSubmenu implements Component {
    *  via the global getter — NOT a constructor param. The pi `Theme` constructor param is used
    *  only for `fg("muted", ...)` model-span muting. */
   private readonly listTheme = getSettingsListTheme();
+  /** Effective open-value flag for THIS setting (per-setting override > type-def flag). */
+  private readonly supportsCustom: boolean;
+  /** True when the picker opened straight into text-entry (preset-less open setting): Esc
+   *  closes the editor instead of falling back to a filter list that has nothing to show. */
+  private directEntry = false;
   /** True iff this picker is for a `model`-type setting (constructor-time fact — muting applies). */
   private readonly isModel: boolean;
 
@@ -67,6 +72,7 @@ export class ValuePickerSubmenu implements Component {
     presets: readonly PresetItem[],
     currentRawValue: string,
     private settingType: SettingType,
+    supportsCustomValues: boolean,
     private theme: Theme,
     private done: (value?: unknown) => void,
     maxVisible: number,
@@ -74,6 +80,7 @@ export class ValuePickerSubmenu implements Component {
     this.maxVisible = maxVisible;
     this.filterInput = new Input();
     this.typeDef = getTypeDefinition(settingType);
+    this.supportsCustom = supportsCustomValues;
     this.isModel = settingType === "model";
     // Build a TypeContext from presets (a custom parse/format derives the null label itself from
     // ctx.presets — the pair whose value is null).
@@ -82,7 +89,9 @@ export class ValuePickerSubmenu implements Component {
     // Build entries: label for display, raw value for done callback.
     // currentRawValue (serialized string) is matched against preset displayValue to find the active preset.
     const matchIndex = presets.findIndex((p) => p.displayValue === currentRawValue);
-    const hasCustomIndicator = matchIndex < 0;
+    // An empty current raw value is the NULL display of a preset-less string — there is no
+    // current value to indicate, so no indicator row (just presets + the custom entry).
+    const hasCustomIndicator = matchIndex < 0 && currentRawValue !== "";
 
     this.entries = [];
     if (hasCustomIndicator) {
@@ -95,10 +104,11 @@ export class ValuePickerSubmenu implements Component {
     for (const preset of presets) {
       this.entries.push({ label: preset.label, rawValue: preset.rawValue, kind: "preset" });
     }
-    // Pinned "Custom value…" row (open types only): free-form entry via Up/Down + Enter, which
-    // switches the top field into text-entry mode. Distinguished by kind (rawValue is null, which
-    // is a valid preset value).
-    if (this.typeDef.supportsCustomValues) {
+    // Pinned "Custom value…" row (open settings only): free-form entry via Up/Down + Enter,
+    // which switches the top field into text-entry mode. Distinguished by kind (rawValue is
+    // null, which is a valid preset value). The flag is the EFFECTIVE per-setting one — a
+    // `supportsCustomValues: true` override opens an otherwise-closed type (e.g. string).
+    if (this.supportsCustom) {
       this.entries.push({ label: "Custom value…", rawValue: null, kind: "custom" });
     }
 
@@ -113,6 +123,14 @@ export class ValuePickerSubmenu implements Component {
 
     // The top field is the filter; in text-entry mode it builds a custom value.
     this.filterInput.focused = true;
+
+    // A preset-less OPEN setting has nothing to pick — open directly in text-entry mode,
+    // prefilled with the current value (edit-in-place), instead of a list whose only row
+    // is "Custom value…". Esc then closes the editor (there is no list to fall back to).
+    this.directEntry = presets.length === 0 && supportsCustomValues;
+    if (this.directEntry) {
+      this.enterTextEntry(currentRawValue);
+    }
   }
 
   /** Format a serialized raw value for display via the TypeDefinition. */
@@ -302,6 +320,12 @@ export class ValuePickerSubmenu implements Component {
       return;
     }
     if (kb.matches(data, "tui.select.cancel")) {
+      // Direct-entry editors have no list to return to — Esc closes the picker (cancel edit).
+      if (this.directEntry) {
+        this.closed = true;
+        this.done();
+        return;
+      }
       this.leaveTextEntry();
       return;
     }
@@ -309,21 +333,23 @@ export class ValuePickerSubmenu implements Component {
     this.filterInput.handleInput(data);
   }
 
-  /** Enter on the focused entry: preset/indicator → done(rawValue); Custom row → text-entry mode. */
+  /** Enter on the focused entry: preset/indicator → done(rawValue); Custom row → text-entry
+   *  mode (empty editor — the direct-open path is what prefills the current value). */
   private activateEntry(): void {
     const entry = this.visibleEntries[this.selectedIndex];
     if (!entry) return;
     if (entry.kind === "custom") {
-      this.enterTextEntry();
+      this.enterTextEntry("");
       return;
     }
     this.closed = true;
     this.done(entry.rawValue);
   }
 
-  private enterTextEntry(): void {
+  private enterTextEntry(prefill: string): void {
     this.customEntryFilterSnapshot = this.filterInput.getValue();
-    this.filterInput.setValue("");
+    // Prefill the editor with the given value (edit-in-place; "" starts empty).
+    this.filterInput.setValue(prefill);
     this.mode = "text-entry";
     this.errorMessage = "";
   }
@@ -338,7 +364,11 @@ export class ValuePickerSubmenu implements Component {
 
   /** Validate the typed custom value; on success fire done(rawValue), on failure show the error. */
   private submitCustomValue(): void {
-    const result = validateCustomValue(this.filterInput.getValue(), this.settingType, this.ctx);
+    // An override-opened closed type (e.g. string) validates custom text against the OPEN
+    // parse — preset matching is a picker affordance there, not a validity gate. Types that
+    // are natively open keep their full ctx (their parse handles arbitrary input anyway).
+    const customCtx = this.typeDef.supportsCustomValues ? this.ctx : null;
+    const result = validateCustomValue(this.filterInput.getValue(), this.settingType, customCtx);
     if (result === undefined) {
       this.errorMessage = `  \u26a0 ${this.typeDef.errorMessage}`;
       return;
