@@ -102,7 +102,7 @@ Every setting has a `type` resolved through a first-class `TypeDefinition` regis
 
 | Type | Stored value | Notes |
 |------|-------------|-------|
-| `string` | `string` | Text; closed enums via presets (`["a", "b"]`) |
+| `string` | `string` | Text; closed enums via presets (`["a", "b"]`), or free-form with `supportsCustomValues: true` |
 | `number` | `number` \| `null` | Optional `min`/`max` bounds; `null` (unbounded/off) via a null preset |
 | `duration` | `number` \| `null` | Human-readable (`5m`, `1h`, `30s`, `14d`); stored as milliseconds. `null` = unbounded/off, via a null preset |
 | `compact-threshold` | `string` | Compact-context thresholds (`none`, `compact`, `compact>75K`, …) |
