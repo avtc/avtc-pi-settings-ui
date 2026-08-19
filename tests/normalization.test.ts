@@ -807,7 +807,7 @@ describe("thinking-level — load via the gate", () => {
   });
 
   it("loads the default when the stored value is invalid", () => {
-    // 'bogus' is not one of the six levels → parse rejects it → the gate falls back to the default.
+    // 'bogus' is not one of the seven levels → parse rejects it → the gate falls back to the default.
     const out = normalizeFromSchema({ thinking: "bogus" }, thinkingSchema({}));
     expect(out.thinking).toBe("medium");
   });

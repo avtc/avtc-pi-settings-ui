@@ -250,7 +250,7 @@ const booleanType: TypeDefinition<boolean> = {
 // ── The thinking-level built-in ─────────────────────────────────────────────
 
 /**
- * The six thinking levels, as `[label, value]` preset pairs (label equals value). The default
+ * The seven thinking levels, as `[label, value]` preset pairs (label equals value). The default
  * `presets` for the `thinking-level` type — a consumer writes only `{ type: "thinking-level" }`
  * and gets these without declaring `presets` (overridable per-setting: replace, not merge).
  */
@@ -261,6 +261,7 @@ export const THINKING_LEVEL_PRESETS = [
   ["medium", "medium"],
   ["high", "high"],
   ["xhigh", "xhigh"],
+  ["max", "max"],
 ] as const satisfies readonly PresetPair[];
 
 const thinkingLevelType: TypeDefinition<string> = {

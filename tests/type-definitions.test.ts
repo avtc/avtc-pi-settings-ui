@@ -231,7 +231,7 @@ describe("thinking-level type", () => {
   const ctx: TypeContext = { presets };
   const t = getTypeDefinition("thinking-level");
 
-  it("ships THINKING_LEVEL_PRESETS as its default presets (6 levels, label = value)", () => {
+  it("ships THINKING_LEVEL_PRESETS as its default presets (7 levels, label = value)", () => {
     expect(THINKING_LEVEL_PRESETS).toEqual([
       ["off", "off"],
       ["minimal", "minimal"],
@@ -239,6 +239,7 @@ describe("thinking-level type", () => {
       ["medium", "medium"],
       ["high", "high"],
       ["xhigh", "xhigh"],
+      ["max", "max"],
     ]);
     expect(t.presets).toEqual(THINKING_LEVEL_PRESETS);
   });
