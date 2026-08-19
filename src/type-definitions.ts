@@ -267,10 +267,12 @@ export const THINKING_LEVEL_PRESETS = [
 const thinkingLevelType: TypeDefinition<string> = {
   id: "thinking-level",
   valueType: "string",
-  // Membership check against the EFFECTIVE presets (the type-def default, or a per-setting
-  // override). An unknown level returns undefined → the load gate rejects it and falls back to
-  // the setting's defaultValue.
-  parse: (input, ctx) => matchPresetValue(input, ctx),
+  // Closed enum when effective presets exist (the type-def default, or a per-setting
+  // override): an unknown level returns undefined → the load gate rejects it and falls
+  // back to the setting's defaultValue. Empty ctx degrades to identity — the preset
+  // normalizer parses bare preset strings with an empty preset ctx, and a consumer may
+  // declare the level vocabulary as plain strings (the string type's same contract).
+  parse: (input, ctx) => (ctx.presets.length > 0 ? matchPresetValue(input, ctx) : input),
   format: (value) => value,
   presets: THINKING_LEVEL_PRESETS,
   supportsCustomValues: false,

@@ -880,6 +880,18 @@ describe("normalizePresetElements", () => {
     ]);
   });
 
+  it("treats a bare string as identity for thinking-level (empty-ctx preset normalization)", () => {
+    // The string type's same contract: a consumer may declare the level vocabulary as plain
+    // strings — they normalize to [label, value] pairs with label === value. (Pre-degradation
+    // this threw 'preset off is not a valid thinking-level' at extension load.)
+    const tl: SettingSchema = { id: "lvl", label: "L", type: "thinking-level", defaultValue: "medium" };
+    expect(normalizePresetElements(["off", "minimal", "high"], tl)).toEqual([
+      ["off", "off"],
+      ["minimal", "minimal"],
+      ["high", "high"],
+    ]);
+  });
+
   it("recognizes compact-threshold bare sentinels + thresholds (label === value)", () => {
     // "none"/"compact" are the type's off/force sentinels; "compact>NK" is the threshold form.
     // A consumer can declare the full vocabulary as a plain string array.
