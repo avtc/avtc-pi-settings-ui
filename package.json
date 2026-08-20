@@ -1,6 +1,6 @@
 {
   "name": "avtc-pi-settings-ui",
-  "version": "1.0.10",
+  "version": "1.0.9",
   "description": "A schema-driven settings UI for pi extensions — define your settings, get a tabbed modal, a /<name>:settings command, and layered persistence.",
   "type": "module",
   "main": "./index.ts",
