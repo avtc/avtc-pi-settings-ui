@@ -59,6 +59,14 @@ export interface TypeDefinition<T = unknown> {
    * from the registry). Absent means this type offers no default presets.
    */
   presets?: PresetsSource;
+  /**
+   * Inherently nullable: `null` is always a valid value for this type, even when the
+   * effective presets yield no null pair at gate time (a resolver-function presets
+   * source — e.g. the model list — resolves its `["Default", null]` pair only at
+   * modal-open, so the write gate would otherwise reject null and a model setting
+   * could never be unset back to Default).
+   */
+  nullable?: boolean;
 }
 
 // ── Registry ────────────────────────────────────────────────────────────────
@@ -299,11 +307,13 @@ const modelType: TypeDefinition<string> = {
   id: "model",
   valueType: "string",
   // Identity parse — a provider/id (even a stale one) loads unchanged. Null is valid via the
-  // gate's null-preset path (the resolver's ['Default', null] pair), not via parse.
+  // gate's null path (the `nullable` trait — the resolver's ['Default', null] pair only
+  // resolves at modal-open, too late for the write gate), not via parse.
   parse: (input) => input,
   format: (value) => formatModelValue(value),
   presets: resolveModelPresets,
   supportsCustomValues: false,
+  nullable: true,
   errorMessage: "Select a model",
 };
 

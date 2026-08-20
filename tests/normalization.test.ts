@@ -1055,3 +1055,25 @@ describe("supportsCustomValues override + string null display", () => {
     expect(isInvalidResult(resolveSettingValue({ mode: "custom-x" }, closedEnum))).toBe(true);
   });
 });
+
+// ── model-type null: the resolver-function presets source resolves its null pair only at
+//    modal-open, so the gate must honor the type's nullable trait at write/load time ──
+describe("model-type nullability (nullable trait vs resolver-time null pair)", () => {
+  it("accepts null for a model-type setting with NO static presets (unset back to Default)", () => {
+    const schema = singleSettingSchema({
+      id: "mymodel",
+      label: "Model",
+      type: "model",
+      defaultValue: null as unknown as string,
+    });
+    const row = schema.settings[0] as SettingSchema;
+    expect(normalizeFromSchema({ mymodel: null }, schema).mymodel).toBeNull();
+    expect(resolveSettingValue({ mymodel: null }, row)).toBeNull();
+  });
+
+  it("still rejects null for a non-nullable type with resolver-less empty presets", () => {
+    const schema = singleSettingSchema({ id: "name", label: "Name", type: "string", defaultValue: "x" });
+    const row = schema.settings[0] as SettingSchema;
+    expect(isInvalidResult(resolveSettingValue({ name: null }, row))).toBe(true);
+  });
+});

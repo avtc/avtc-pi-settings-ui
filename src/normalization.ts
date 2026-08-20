@@ -102,9 +102,12 @@ export function resolveSettingValue(raw: Record<string, unknown>, setting: Setti
   }
 
   // 4. null validity — keep null iff a null-preset exists (nullLabel derived from the effective
-  //    presets). A type with no null-preset rejects null. Legitimate nulls never reach parse.
+  //    presets) OR the type is inherently nullable (a resolver-function presets source — e.g.
+  //    the model list — only yields its null pair at modal-open, so the write gate would
+  //    otherwise reject null and the setting could never be unset back to Default). A type
+  //    with no null-preset and no nullable trait rejects null. Legitimate nulls never reach parse.
   if (value === null) {
-    return nullLabel !== undefined ? null : INVALID;
+    return nullLabel !== undefined || typeDef.nullable === true ? null : INVALID;
   }
 
   // 5. parse-if-string. Parse is string-only by signature; raw numbers/booleans
