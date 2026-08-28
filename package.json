@@ -1,6 +1,6 @@
 {
   "name": "avtc-pi-settings-ui",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "A schema-driven settings UI for pi extensions — define your settings, get a tabbed modal, a /<name>:settings command, and layered persistence.",
   "type": "module",
   "main": "./index.ts",
@@ -40,7 +40,7 @@
     "allowedCodeDeps": [
       "avtc-pi-logger"
     ],
-    "image": "https://raw.githubusercontent.com/avtc/avtc-pi-settings-ui/main/assets/images/settings-dropdown.png"
+    "image": "https://raw.githubusercontent.com/avtc/avtc-pi-settings-ui/main/assets/images/cover.png"
   },
   "author": "avtc <tarasenkov@gmail.com>",
   "license": "MIT",
