@@ -50,18 +50,6 @@ The settings modal queues behind other open dialogs (instead of stealing keyboar
 
 Without ui-components the settings modal still works — it just opens immediately rather than queuing.
 
-## Public API
-
-| Export | Purpose |
-|---|---|
-| `registerSettingsCommand(pi, schema, opts)` | Register the `/<name>:settings` command + modal; returns the settings handle you read from at runtime |
-| `settingsFilePaths(name)` | Global + project file paths for `<name>`'s settings — `~/.pi/agent/<name>-settings.json` and `<cwd>/.pi/<name>-settings.json` (spread into the schema) |
-| `SettingSchema`, `SettingsSchema` | Define your settings and tabs |
-| `StorageLevel`, `SettingsHandle`, `RegisterSettingsOptions` | Types: storage levels (`session`/`project`/`global`), the returned handle, the options bag |
-| `PresetsSource`, `PresetPair`, `PresetElement`, `PresetValue` | Author `presets`: full pairs or bare values (string/number/boolean/null) |
-| `registerTypeDefinition`, `TypeDefinition`, `TypeContext` | Register custom types (7 built-ins ship pre-registered) |
-| `formatHumanDuration` | Human form of a duration |
-
 ## Usage
 
 ```ts
@@ -96,6 +84,18 @@ const settings = registerSettingsCommand(pi, schema, {
 settings.getSettings();
 ```
 
+## Public API
+
+| Export | Purpose |
+|---|---|
+| `registerSettingsCommand(pi, schema, opts)` | Register the `/<name>:settings` command + modal; returns the settings handle you read from at runtime |
+| `settingsFilePaths(name)` | Global + project file paths for `<name>`'s settings — `~/.pi/agent/<name>-settings.json` and `<cwd>/.pi/<name>-settings.json` (spread into the schema) |
+| `SettingSchema`, `SettingsSchema` | Define your settings and tabs |
+| `StorageLevel`, `SettingsHandle`, `RegisterSettingsOptions` | Types: storage levels (`session`/`project`/`global`), the returned handle, the options bag |
+| `PresetsSource`, `PresetPair`, `PresetElement`, `PresetValue` | Author `presets`: full pairs or bare values (string/number/boolean/null) |
+| `registerTypeDefinition`, `TypeDefinition`, `TypeContext` | Register custom types (7 built-ins ship pre-registered) |
+| `formatHumanDuration` | Human form of a duration |
+
 ## Setting types
 
 Every setting has a `type` resolved through a first-class `TypeDefinition` registry. Seven built-ins ship out of the box:
@@ -123,6 +123,10 @@ Choose your storage levels via `storageLevels` on `registerSettingsCommand` (def
 - **`global`** — `~/.pi/agent/<name>-settings.json`. Survives everywhere.
 
 **How edits save:** with a single file level (`global` or `project`), each edit writes straight to that file, so every pi instance reads the same on-disk truth. With multiple levels (or `session`), edits are held as a draft until you press a save key — `Ctrl+S` saves project, `Ctrl+D` saves global (each only when its level is enabled).
+
+## Claude Code port
+
+A Claude Code (mods) port of this library lives in [`claude/README.md`](claude/README.md).
 
 ## Full suite
 

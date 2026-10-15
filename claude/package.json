@@ -1,0 +1,29 @@
+{
+  "name": "avtc-claude-settings-ui",
+  "version": "1.0.12",
+  "description": "A schema-driven settings UI for Claude mods — define your settings, get a tabbed pane, a /<name>-settings command, and layered persistence.",
+  "type": "module",
+  "license": "MIT",
+  "keywords": [
+    "claude-mod-library"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json"
+  },
+  "author": "avtc <tarasenkov@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/avtc/avtc-pi-settings-ui.git"
+  },
+  "bugs": {
+    "url": "https://github.com/avtc/avtc-pi-settings-ui/issues"
+  },
+  "homepage": "https://github.com/avtc/avtc-pi-settings-ui"
+}
