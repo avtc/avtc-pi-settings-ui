@@ -378,6 +378,20 @@ describe("pane tree — the pi-shaped layout", () => {
     expect(description).toContain("dimColor");
     expect(description).toContain("mono");
   });
+
+  test("keyboard hints draw only on keyboard-driven surfaces (the legend and the picker hint drop on desktop)", async () => {
+    const { controller } = await makeController();
+    const keyboard = buildPaneTree(ELEMENTS as never, controller, { bodyColumns: 80 }) as {
+      children: Record<string, unknown>[];
+    };
+    expect(JSON.stringify(keyboard)).toContain("settings-legend");
+    const desktop = buildPaneTree(ELEMENTS as never, controller, {
+      bodyColumns: 80,
+      surface: "desktop",
+    }) as { children: Record<string, unknown>[] };
+    expect(JSON.stringify(desktop)).not.toContain("settings-legend");
+    expect(JSON.stringify(desktop)).not.toContain("Esc | ↑↓: navigate");
+  });
 });
 
 const LIVE_ELEMENTS = {

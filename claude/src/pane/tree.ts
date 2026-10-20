@@ -35,6 +35,10 @@ export interface PaneTreeOptions {
   bodyColumns: number;
   /** A dirty marker in the footer (the unsaved-changes hint). */
   dirty?: boolean;
+  /** The surface drawing the pane (e.surface). Keyboard-driven hints are
+   *  drawn only on surfaces whose controls take the keyboard (the desktop
+   *  drives the pane with the pointer). */
+  surface?: string;
 }
 
 const TAB_KEY_PREFIX = "settings-tab-";
@@ -180,7 +184,9 @@ function pickerBody(
       label: "← Back",
       onPress: () => controller.closePicker(),
     }),
-    els.Text({ children: ["  Enter to select · Esc to go back"], dimColor: true }),
+    ...(options.surface === "desktop"
+      ? []
+      : [els.Text({ children: ["  Enter to select · Esc to go back"], dimColor: true })]),
     els.Text({ children: [" "] }),
     els.Box({
       key: "picker-description",
@@ -331,19 +337,24 @@ export function buildPaneTree(els: PaneElements, controller: PaneController, opt
         children: [descriptionBox(els, describedRow, options.bodyColumns)],
       }),
       els.Box({ key: "settings-footer", flexDirection: "row", columnGap: 1, children: footerActions }),
-      // The keybind legend (pi-style footer note)
-      els.Box({
-        key: "settings-legend",
-        flexDirection: "row",
-        children: [
-          els.Text({
-            children: [
-              "  Esc | ↑↓: navigate | ←→: filter cursor | Ctrl+←/→: switch tab | Enter: change | Ctrl+S: save project | Ctrl+G: save global",
-            ],
-            dimColor: true,
-          }),
-        ],
-      }),
+      // The keybind legend (pi-style footer note) — only where the keyboard
+      // drives the pane; pointer-driven surfaces draw nothing
+      ...(options.surface === "desktop"
+        ? []
+        : [
+            els.Box({
+              key: "settings-legend",
+              flexDirection: "row",
+              children: [
+                els.Text({
+                  children: [
+                    "  Esc | ↑↓: navigate | ←→: filter cursor | Ctrl+←/→: switch tab | Enter: change | Ctrl+S: save project | Ctrl+G: save global",
+                  ],
+                  dimColor: true,
+                }),
+              ],
+            }),
+          ]),
     ],
   });
 }
