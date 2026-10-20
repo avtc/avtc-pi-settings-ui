@@ -395,6 +395,17 @@ describe("pane tree — the pi-shaped layout", () => {
     expect(json.indexOf('"autoFocus":true', autoFocusPos + 1)).toBe(-1);
   });
 
+  test("the selection marker draws only on keyboard-driven surfaces", async () => {
+    const { controller } = await makeController();
+    const keyboard = JSON.stringify(buildPaneTree(ELEMENTS as never, controller, { bodyColumns: 80 }));
+    expect(keyboard).toContain("→ "); // the arrow marker on the ring's row
+    const desktop = JSON.stringify(
+      buildPaneTree(ELEMENTS as never, controller, { bodyColumns: 80, surface: "desktop" }),
+    );
+    expect(desktop).not.toContain("→ "); // no walk to point at
+    expect(desktop).not.toContain('"color":"claude"'); // no purple label seat
+  });
+
   test("keyboard hints draw only on keyboard-driven surfaces (the legend and the picker hint drop on desktop)", async () => {
     const { controller } = await makeController();
     const keyboard = buildPaneTree(ELEMENTS as never, controller, { bodyColumns: 80 }) as {

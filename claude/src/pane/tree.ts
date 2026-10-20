@@ -266,7 +266,19 @@ export function buildPaneTree(els: PaneElements, controller: PaneController, opt
     }),
   );
   const labelWidth = Math.max(...visibleSettings.map((row) => row.label.length), 1);
-  const rows = visibleSettings.map((row, index) => settingRow(els, controller, row, index, labelWidth, ringRowId));
+  const rows = visibleSettings.map((row, index) =>
+    settingRow(
+      els,
+      controller,
+      row,
+      index,
+      labelWidth,
+      // the selection marker names the keyboard walk's seat; a pointer-driven
+      // surface has no walk, and no hook follows its hover — the marker
+      // would point at a row the pointer never chose
+      options.surface === "desktop" ? null : ringRowId,
+    ),
+  );
 
   const footerActions: unknown[] = [];
   const liveSave = storageLevels.length === 1 && storageLevels[0] !== "session";
