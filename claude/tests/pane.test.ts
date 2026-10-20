@@ -379,6 +379,22 @@ describe("pane tree — the pi-shaped layout", () => {
     expect(description).toContain("mono");
   });
 
+  test("the first tab carries autoFocus — the pane's initial focus ring starts there", async () => {
+    const { controller } = await makeController();
+    const tree = buildPaneTree(ELEMENTS as never, controller, { bodyColumns: 80 });
+    const json = JSON.stringify(tree);
+    const firstTab = json.indexOf('"settings-tab-0"');
+    const lastTab = json.indexOf('"settings-tab-1"');
+    // the tab lane's own autoFocus (the filter Input also carries one — it is
+    // drawn first and wins on keyboard surfaces; the tab is the pointer
+    // surfaces' explicit start)
+    const autoFocusPos = json.indexOf('"autoFocus":true', firstTab);
+    expect(autoFocusPos).toBeGreaterThan(-1);
+    expect(autoFocusPos).toBeGreaterThan(firstTab);
+    expect(autoFocusPos).toBeLessThan(lastTab); // only the first tab
+    expect(json.indexOf('"autoFocus":true', autoFocusPos + 1)).toBe(-1);
+  });
+
   test("keyboard hints draw only on keyboard-driven surfaces (the legend and the picker hint drop on desktop)", async () => {
     const { controller } = await makeController();
     const keyboard = buildPaneTree(ELEMENTS as never, controller, { bodyColumns: 80 }) as {

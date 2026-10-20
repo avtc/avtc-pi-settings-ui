@@ -238,6 +238,9 @@ export function buildPaneTree(els: PaneElements, controller: PaneController, opt
       key: `${TAB_KEY_PREFIX}${index}`,
       label: `${index === activeTabIndex ? ACTIVE_TAB_MARKER : INACTIVE_TAB_MARKER} ${tab.label}`,
       dimColor: index !== activeTabIndex,
+      // the first tab owns the pane's initial focus ring (a surface that
+      // focuses the last actable drawn otherwise starts there)
+      ...(index === 0 ? { autoFocus: true as const } : {}),
       onPress: () => controller.switchTab(index),
     }),
   );
