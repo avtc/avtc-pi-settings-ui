@@ -12,5 +12,9 @@ export interface PaneTreeOptions {
     bodyColumns: number;
     /** A dirty marker in the footer (the unsaved-changes hint). */
     dirty?: boolean;
+    /** The surface drawing the pane (e.surface). Keyboard-driven hints are
+     *  drawn only on surfaces whose controls take the keyboard (the desktop
+     *  drives the pane with the pointer). */
+    surface?: string;
 }
 export declare function buildPaneTree(els: PaneElements, controller: PaneController, options: PaneTreeOptions): unknown;

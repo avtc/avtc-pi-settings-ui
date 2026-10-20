@@ -113,7 +113,9 @@ function pickerBody(els, controller, options, pickingRow, pickerFilter, pickerEp
         key: "picker-back",
         label: "← Back",
         onPress: () => controller.closePicker(),
-    }), els.Text({ children: ["  Enter to select · Esc to go back"], dimColor: true }), els.Text({ children: [" "] }), els.Box({
+    }), ...(options.surface === "desktop"
+        ? []
+        : [els.Text({ children: ["  Enter to select · Esc to go back"], dimColor: true })]), els.Text({ children: [" "] }), els.Box({
         key: "picker-description",
         flexDirection: "column",
         children: [descriptionBox(els, pickingRow, options.bodyColumns)],
@@ -230,19 +232,24 @@ export function buildPaneTree(els, controller, options) {
                 children: [descriptionBox(els, describedRow, options.bodyColumns)],
             }),
             els.Box({ key: "settings-footer", flexDirection: "row", columnGap: 1, children: footerActions }),
-            // The keybind legend (pi-style footer note)
-            els.Box({
-                key: "settings-legend",
-                flexDirection: "row",
-                children: [
-                    els.Text({
+            // The keybind legend (pi-style footer note) — only where the keyboard
+            // drives the pane; pointer-driven surfaces draw nothing
+            ...(options.surface === "desktop"
+                ? []
+                : [
+                    els.Box({
+                        key: "settings-legend",
+                        flexDirection: "row",
                         children: [
-                            "  Esc | ↑↓: navigate | ←→: filter cursor | Ctrl+←/→: switch tab | Enter: change | Ctrl+S: save project | Ctrl+G: save global",
+                            els.Text({
+                                children: [
+                                    "  Esc | ↑↓: navigate | ←→: filter cursor | Ctrl+←/→: switch tab | Enter: change | Ctrl+S: save project | Ctrl+G: save global",
+                                ],
+                                dimColor: true,
+                            }),
                         ],
-                        dimColor: true,
                     }),
-                ],
-            }),
+                ]),
         ],
     });
 }
