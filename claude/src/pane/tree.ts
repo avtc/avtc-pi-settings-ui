@@ -86,6 +86,9 @@ function settingRow(
     columnGap: 1,
     children: [
       els.Text({
+        // the padded label column needs the monospaced face on surfaces whose
+        // UI face is proportional (the terminal ignores the prop)
+        mono: true,
         children: [`${marker}${row.label.padEnd(labelWidth)}`],
         ...(ringRowId === row.id ? { color: "claude" } : {}),
       }),
@@ -105,7 +108,7 @@ function descriptionBox(els: PaneElements, row: SettingItem | null, bodyColumns:
     lines.push(text.slice(i, i + perLine));
   }
   while (lines.length < DESCRIPTION_LINES) lines.push("");
-  return els.Text({ children: [lines.join("\n")], dimColor: true });
+  return els.Text({ mono: true, children: [lines.join("\n")], dimColor: true });
 }
 
 /** The value picker (pi's filter-first picker): the picking row's title, a

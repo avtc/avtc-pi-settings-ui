@@ -369,10 +369,14 @@ describe("pane tree — the pi-shaped layout", () => {
     // the label column carries ONLY the label — the description moved out
     expect(labelText).not.toContain(" — ");
     expect(typeof firstRowCells[0]?.children).toBe("object");
+    // the padded column asks for the monospaced face (proportional surfaces
+    // would misalign the value column; the terminal ignores the prop)
+    expect((firstRowCells[0] as { mono?: boolean }).mono).toBe(true);
     const description = JSON.stringify(
       tree.children.find((child) => (child as { key?: string }).key === "settings-description"),
     );
     expect(description).toContain("dimColor");
+    expect(description).toContain("mono");
   });
 });
 
