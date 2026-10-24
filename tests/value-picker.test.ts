@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: 2026 avtc <tarasenkov@gmail.com>
 
 import { initTheme, type Theme } from "@earendil-works/pi-coding-agent";
+import { stripTerminalSequences } from "@earendil-works/pi-tui";
 import { beforeAll, describe, expect, test } from "vitest";
 import type { PresetItem } from "../src/schema.js";
 import { PICKER_VIEWPORT_MAX, ValuePickerSubmenu } from "../src/ui/value-picker.js";
@@ -784,9 +785,11 @@ describe("ValuePickerSubmenu — preset-less open setting opens directly in the 
     const out = renderFlat(picker, DEFAULT_WIDTH);
     expect(out).toContain("custom:"); // the editor (hint + input), not the filter list
     expect(out).not.toContain("Custom value…"); // no degenerate one-row list
-    // prefilled with the current value (cursor reverse-video splits the text — strip ANSI first)
-    const ansi = new RegExp(`${String.fromCharCode(27)}[[0-9;]*m`, "g");
-    expect(out.replace(ansi, "")).toContain("C:/scenario/ae2d92c1");
+    // prefilled with the current value (the drawn cursor splits the text — strip ALL
+    // terminal sequences first: pi-tui >= 1.2.0 wraps the cursor in zero-width APC
+    // markers (_pi:c/_pi:fc) instead of reverse-video SGR, so an SGR-only strip leaves
+    // marker fragments interleaved with the text; stripTerminalSequences covers both)
+    expect(stripTerminalSequences(out)).toContain("C:/scenario/ae2d92c1");
   });
 
   test("no presets + custom support + empty raw → empty editor; typed text submits on Enter", () => {
