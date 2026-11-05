@@ -1,6 +1,6 @@
 {
   "name": "avtc-claude-settings-ui",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "description": "A schema-driven settings UI for Claude mods — define your settings, get a tabbed pane, a /<name>-settings command, and layered persistence.",
   "type": "module",
   "license": "MIT",
