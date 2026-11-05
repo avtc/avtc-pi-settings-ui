@@ -8,6 +8,10 @@
 export { captureCtx } from "./ctx-store.js";
 // The settings store — create the handle over injected fs/env seams.
 export { createSettingsExtension } from "./factory.js";
+// Settings-derived model rows — labeled [label, value] pairs for the user's own
+// models (availableModels entries + modelPicker-only options) from a settings
+// snapshot; the host supplies the engine values it reserves for itself.
+export { modelPairsFromSettings } from "./model-presets.js";
 // The pane — the interaction model + tree composition a host's ui.render hook drives.
 export { createPaneController } from "./pane/controller.js";
 export { buildPaneTree } from "./pane/tree.js";

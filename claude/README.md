@@ -99,6 +99,8 @@ const tree = buildPaneTree(els, controller, { bodyColumns: e.props.bodyColumns }
 | `buildPaneTree(els, controller, options)` | Composes the render tree over the surface's element table |
 | `settingsFilePaths(name)` | Global/project file path helpers for the schema |
 | `registerSettingsCommand`, `loadSettingsHandle` | Wiring a `/name-settings`-style command and lazy handle load |
+| `captureCtx` | Stash the host's models list / enabled-models patterns at pane-open (feeds the `model` type's presets) |
+| `modelPairsFromSettings(settings, reservedValues)` | Labeled model rows for the host's own models from a Claude settings snapshot — `availableModels` entries plus `modelPicker`-only options, labels from the lineup; pass the engine values you already offer (aliases, spawn keywords) so they never duplicate |
 | `registerTypeDefinition` | Custom setting types |
 | Types | `SettingsSchema`, `SettingSchema`, `SettingsTabSchema`, `FsAdapter`, `EnvStore`, `PaneController`, `PaneTreeOptions`, … |
 

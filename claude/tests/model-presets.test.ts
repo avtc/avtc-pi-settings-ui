@@ -7,7 +7,14 @@
 
 import { describe, expect, test } from "vitest";
 import { captureCtx } from "../src/ctx-store.js";
-import { globMatch, isEnabled, modelLabel, resolveModelPresets, splitModelId } from "../src/model-presets.js";
+import {
+  globMatch,
+  isEnabled,
+  modelLabel,
+  modelPairsFromSettings,
+  resolveModelPresets,
+  splitModelId,
+} from "../src/model-presets.js";
 
 const MODELS = [
   { id: "claude-sonnet-4", provider: "anthropic" },
@@ -89,5 +96,72 @@ describe("resolveModelPresets — the injected-registry resolver", () => {
     expect(none).toHaveLength(4);
     captureCtx({ models: MODELS, enabledModelPatterns: null });
     expect(await resolveModelPresets()).toHaveLength(4);
+  });
+});
+
+describe("modelPairsFromSettings — labeled rows from a Claude settings snapshot", () => {
+  const RESERVED = new Set(["sonnet", "haiku", "opus", "fable", "sonnet[1m]", "default", "best", "opusplan"]);
+
+  test("availableModels rows, labeled from modelPicker; repeats and non-strings drop", () => {
+    const pairs = modelPairsFromSettings(
+      {
+        availableModels: ["glm-5.3", "sonnet", "claude-fable-5", "claude-fable-5", 7],
+        modelPicker: { options: [{ model: "glm-5.3", label: "Z.ai GLM" }] },
+      },
+      RESERVED,
+    );
+    expect(pairs).toEqual([
+      ["Z.ai GLM", "glm-5.3"],
+      ["claude-fable-5", "claude-fable-5"],
+    ]);
+  });
+
+  test("modelPicker-only rows append after availableModels rows", () => {
+    const pairs = modelPairsFromSettings(
+      {
+        modelPicker: {
+          options: [
+            { model: "glm-5.3", label: "GLM 5.3 (zai)", description: "via sampling-proxy" },
+            { model: "mimo-v2.6-flash" },
+            { model: "sonnet", label: "Sonnet relabeled" },
+            { model: 7, label: "malformed" },
+            { label: "no model" },
+          ],
+        },
+      },
+      RESERVED,
+    );
+    expect(pairs).toEqual([
+      ["GLM 5.3 (zai)", "glm-5.3"],
+      ["mimo-v2.6-flash", "mimo-v2.6-flash"],
+    ]);
+  });
+
+  test("a model in both sources yields one labeled row", () => {
+    const pairs = modelPairsFromSettings(
+      { availableModels: ["glm-5.3", "qwen"], modelPicker: { options: [{ model: "qwen", label: "Qwen (local)" }] } },
+      RESERVED,
+    );
+    expect(pairs).toEqual([
+      ["glm-5.3", "glm-5.3"],
+      ["Qwen (local)", "qwen"],
+    ]);
+  });
+
+  test("reserved values never become rows, in either source", () => {
+    const pairs = modelPairsFromSettings(
+      { availableModels: ["default", "sonnet[1m]"], modelPicker: { options: [{ model: "fable", label: "x" }] } },
+      RESERVED,
+    );
+    expect(pairs).toEqual([]);
+  });
+
+  test("malformed settings collapse to zero rows — never throw", () => {
+    expect(modelPairsFromSettings(null, RESERVED)).toEqual([]);
+    expect(modelPairsFromSettings("sonnet", RESERVED)).toEqual([]);
+    expect(
+      modelPairsFromSettings({ availableModels: "sonnet", modelPicker: { options: [{ label: 3 }] } }, RESERVED),
+    ).toEqual([]);
+    expect(modelPairsFromSettings({}, RESERVED)).toEqual([]);
   });
 });

@@ -16,6 +16,19 @@ export declare function splitModelId(value: string): {
     provider: string;
     id: string;
 } | null;
+/** Labeled `[label, value]` rows for the user's own models, read from a Claude
+ *  Code settings snapshot (the `$.settings.read` shape):
+ *
+ * - each `availableModels` entry becomes a row — the value verbatim (an id the
+ *   host's own model selection accepts), labeled from `modelPicker.options`
+ *   when the user named it there
+ * - `modelPicker.options` entries no `availableModels` entry names append after
+ *   them (their own label, or the id), so a picker lineup alone still yields rows
+ *
+ * `reservedValues` are engine values the caller already offers its own way
+ * (aliases, spawn keywords) — they never become rows here. Malformed shapes
+ * (non-arrays, non-strings, bad options) collapse to zero rows; never throws. */
+export declare function modelPairsFromSettings(settings: unknown, reservedValues: ReadonlySet<string>): PresetPair[];
 /**
  * Glob match over the minimatch subset patterns use: `*` (any run), `?`
  * (exactly one), everything else literal; case-insensitive. No brace

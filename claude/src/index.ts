@@ -12,6 +12,10 @@ export type { EnvStore } from "./factory.js";
 // The settings store — create the handle over injected fs/env seams.
 export { createSettingsExtension } from "./factory.js";
 export type { FsAdapter } from "./fs-adapter.js";
+// Settings-derived model rows — labeled [label, value] pairs for the user's own
+// models (availableModels entries + modelPicker-only options) from a settings
+// snapshot; the host supplies the engine values it reserves for itself.
+export { modelPairsFromSettings } from "./model-presets.js";
 export type {
   PaneController,
   PaneControllerOptions,

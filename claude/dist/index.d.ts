@@ -2,6 +2,7 @@ export { captureCtx } from "./ctx-store.js";
 export type { EnvStore } from "./factory.js";
 export { createSettingsExtension } from "./factory.js";
 export type { FsAdapter } from "./fs-adapter.js";
+export { modelPairsFromSettings } from "./model-presets.js";
 export type { PaneController, PaneControllerOptions, PaneHandle, PaneNotify, PaneStorageLevels, } from "./pane/controller.js";
 export { createPaneController } from "./pane/controller.js";
 export type { PaneElements, PaneTreeOptions } from "./pane/tree.js";

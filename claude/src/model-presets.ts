@@ -46,6 +46,70 @@ export function splitModelId(value: string): { provider: string; id: string } | 
   return { provider: value.slice(0, slash), id: value.slice(slash + 1) };
 }
 
+/** A `modelPicker.options` entry reduced to its usable fields (label absent when
+ *  the user never named the row). */
+interface PickerOption {
+  readonly model: string;
+  readonly label: string | undefined;
+}
+
+/** Labeled `[label, value]` rows for the user's own models, read from a Claude
+ *  Code settings snapshot (the `$.settings.read` shape):
+ *
+ * - each `availableModels` entry becomes a row — the value verbatim (an id the
+ *   host's own model selection accepts), labeled from `modelPicker.options`
+ *   when the user named it there
+ * - `modelPicker.options` entries no `availableModels` entry names append after
+ *   them (their own label, or the id), so a picker lineup alone still yields rows
+ *
+ * `reservedValues` are engine values the caller already offers its own way
+ * (aliases, spawn keywords) — they never become rows here. Malformed shapes
+ * (non-arrays, non-strings, bad options) collapse to zero rows; never throws. */
+export function modelPairsFromSettings(settings: unknown, reservedValues: ReadonlySet<string>): PresetPair[] {
+  if (settings === null || typeof settings !== "object") return [];
+  const root = settings as Record<string, unknown>;
+
+  const pickerOptions: PickerOption[] = [];
+  const labels = new Map<string, string>();
+  const picker = root.modelPicker;
+  if (picker !== null && typeof picker === "object") {
+    const options = (picker as Record<string, unknown>).options;
+    if (Array.isArray(options)) {
+      for (const option of options) {
+        if (option === null || typeof option !== "object") continue;
+        const model = (option as Record<string, unknown>).model;
+        const label = (option as Record<string, unknown>).label;
+        if (typeof model !== "string" || model.trim().length === 0) continue;
+        const trimmedModel = model.trim();
+        const labelStr = typeof label === "string" && label.length > 0 ? label : undefined;
+        pickerOptions.push({ model: trimmedModel, label: labelStr });
+        if (labelStr) labels.set(trimmedModel, labelStr);
+      }
+    }
+  }
+
+  const pairs: PresetPair[] = [];
+  const seen = new Set<string>();
+  const raw = root.availableModels;
+  if (Array.isArray(raw)) {
+    for (const entry of raw) {
+      if (typeof entry !== "string") continue;
+      const value = entry.trim();
+      if (value.length === 0 || seen.has(value)) continue;
+      if (reservedValues.has(value.toLowerCase())) continue;
+      seen.add(value);
+      pairs.push([labels.get(value) ?? value, value]);
+    }
+  }
+  for (const option of pickerOptions) {
+    if (seen.has(option.model)) continue;
+    if (reservedValues.has(option.model.toLowerCase())) continue;
+    seen.add(option.model);
+    pairs.push([option.label ?? option.model, option.model]);
+  }
+  return pairs;
+}
+
 /**
  * Glob match over the minimatch subset patterns use: `*` (any run), `?`
  * (exactly one), everything else literal; case-insensitive. No brace
